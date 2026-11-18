@@ -1,0 +1,742 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<style>
+    .inspection-page {
+        max-width: 1150px;
+        margin: 0 auto;
+        padding: 28px 20px;
+        color: #26364a;
+    }
+
+    .page-heading {
+        margin-bottom: 25px;
+    }
+
+    .page-heading .eyebrow {
+        color: #0d9488;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
+
+    .page-heading h1 {
+        color: #142d4e;
+        font-size: 27px;
+        margin: 8px 0;
+    }
+
+    .page-heading p {
+        color: #718096;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .inspection-card {
+        background: #fff;
+        border: 1px solid #e5eaf0;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(20, 45, 78, .04);
+    }
+
+    .card-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .card-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: #e7f6f4;
+        color: #0d9488;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .card-heading h2 {
+        color: #183452;
+        font-size: 16px;
+        margin: 0 0 5px;
+    }
+
+    .card-heading p {
+        color: #94a3b8;
+        font-size: 12px;
+        margin: 0;
+    }
+
+    .camera-screen {
+        position: relative;
+        width: 100%;
+        min-height: 350px;
+        background: #101f33;
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .camera-screen video,
+    .camera-screen img {
+        width: 100%;
+        max-height: 480px;
+        object-fit: contain;
+        display: block;
+    }
+
+    .camera-placeholder {
+        text-align: center;
+        color: #a9bfd7;
+        padding: 30px;
+    }
+
+    .camera-placeholder .camera-symbol {
+        font-size: 45px;
+        margin-bottom: 12px;
+    }
+
+    .camera-placeholder h3 {
+        color: #fff;
+        font-size: 17px;
+        margin-bottom: 8px;
+    }
+
+    .camera-placeholder p {
+        font-size: 12px;
+    }
+
+    .camera-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 17px;
+    }
+
+    .btn-action {
+        border: 0;
+        border-radius: 7px;
+        padding: 12px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-capture {
+        background: #0d9488;
+        color: white;
+    }
+
+    .btn-capture:hover {
+        background: #0f766e;
+    }
+
+    .btn-stop {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .btn-stop:hover {
+        background: #fecaca;
+    }
+
+    .btn-action:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+    .camera-status {
+        color: #64748b;
+        font-size: 12px;
+        margin-top: 13px;
+    }
+
+    .upload-area {
+        border: 2px dashed #cbd5e1;
+        border-radius: 10px;
+        padding: 28px 18px;
+        background: #f8fafc;
+        text-align: center;
+        transition: .2s;
+    }
+
+    .upload-area:hover {
+        border-color: #0d9488;
+        background: #f0fdfa;
+    }
+
+    .upload-area .upload-symbol {
+        font-size: 34px;
+        margin-bottom: 10px;
+    }
+
+    .upload-area h3 {
+        color: #334155;
+        font-size: 15px;
+        margin-bottom: 7px;
+    }
+
+    .upload-area p {
+        color: #94a3b8;
+        font-size: 12px;
+        margin-bottom: 15px;
+    }
+
+    .upload-area input {
+        display: block;
+        width: 100%;
+        max-width: 350px;
+        margin: auto;
+        font-size: 12px;
+    }
+
+    .preview-section {
+        display: none;
+        margin-top: 22px;
+    }
+
+    .preview-section h3 {
+        color: #183452;
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    .preview-frame {
+        background: #101f33;
+        border-radius: 10px;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .preview-frame img {
+        max-width: 100%;
+        max-height: 330px;
+        object-fit: contain;
+        border-radius: 5px;
+    }
+
+    .image-name {
+        color: #64748b;
+        font-size: 12px;
+        margin-top: 9px;
+    }
+
+    .info-note {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        background: #eff6ff;
+        border-left: 4px solid #3b82f6;
+        border-radius: 7px;
+        padding: 15px;
+        margin-top: 20px;
+        color: #1e40af;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .submit-button {
+        width: 100%;
+        border: none;
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 20px;
+        background: #142d4e;
+        color: white;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .submit-button:hover {
+        background: #20466f;
+    }
+
+    .submit-button:disabled {
+        opacity: .6;
+        cursor: wait;
+    }
+
+    .back-link {
+        display: inline-block;
+        color: #2563eb;
+        text-decoration: none;
+        font-size: 13px;
+        margin-top: 22px;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    [hidden] {
+        display: none !important;
+    }
+/* ALERTA DE IMAGEN NO VÁLIDA */
+
+.alerta {
+    padding: 17px 20px;
+    margin-bottom: 20px;
+    border-radius: 9px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.alerta.error {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    border-left: 5px solid #dc2626;
+    color: #991b1b;
+}
+
+.alerta.error strong {
+    display: block;
+    color: #b91c1c;
+    font-size: 15px;
+    margin-bottom: 5px;
+}
+
+.alerta.error p {
+    margin: 0;
+}
+    @media (max-width: 600px) {
+        .inspection-page {
+            padding: 20px 12px;
+        }
+
+        .inspection-card {
+            padding: 17px;
+        }
+
+        .page-heading h1 {
+            font-size: 22px;
+        }
+
+        .camera-screen {
+            min-height: 240px;
+        }
+
+        .camera-actions {
+            flex-direction: column;
+        }
+
+        .btn-action {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<div class="inspection-page">
+
+    <header class="page-heading">
+        <span class="eyebrow">Control de calidad</span>
+        <h1>Inspección de preformas PET</h1>
+        <p>
+            Capture o seleccione una fotografía de la preforma
+            para registrarla en el sistema de inspección.
+        </p>
+    </header>
+
+    <!-- ALERTAS DEL SISTEMA -->
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% for categoria, mensaje in mensajes %}
+
+            <div class="alerta {{ categoria }}">
+
+                {% if categoria == "error" %}
+
+                    <strong>⚠ IMAGEN NO VÁLIDA - DEBE CAMBIAR LA IMAGEN</strong>
+
+                    <p>{{ mensaje }}</p>
+
+                    <p>
+                        Seleccione otra fotografía o capture nuevamente
+                        la preforma PET con mejor enfoque.
+                    </p>
+
+                {% else %}
+
+                    {{ mensaje }}
+
+                {% endif %}
+
+            </div>
+
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST"
+          action="{{ url_for('inspeccion') }}"
+          enctype="multipart/form-data"
+          id="formularioInspeccion">
+
+        <!-- CAPTURA CON CAMARA -->
+
+        <section class="inspection-card">
+
+            <div class="card-heading">
+                <div class="card-icon">📷</div>
+                <div>
+                    <h2>Captura de imagen</h2>
+                    <p>Obtenga una fotografía directamente desde la cámara</p>
+                </div>
+            </div>
+
+            <div class="camera-screen">
+
+                <div class="camera-placeholder" id="mensajeCamara">
+                    <div class="camera-symbol">📷</div>
+                    <h3>Cámara desactivada</h3>
+                    <p>Active la cámara para visualizar la preforma PET</p>
+                </div>
+
+                <video id="camara"
+                       autoplay
+                       playsinline
+                       hidden></video>
+
+            </div>
+
+            <div class="camera-actions">
+
+                <button type="button"
+                        class="btn-action btn-primary"
+                        id="btnActivar">
+                    Activar cámara
+                </button>
+
+                <button type="button"
+                        class="btn-action btn-capture"
+                        id="btnCapturar"
+                        disabled>
+                    Capturar fotografía
+                </button>
+
+                <button type="button"
+                        class="btn-action btn-stop"
+                        id="btnDetener"
+                        disabled>
+                    Detener cámara
+                </button>
+
+            </div>
+
+            <p class="camera-status" id="estadoCamara">
+                La cámara se encuentra desactivada.
+            </p>
+
+            <canvas id="lienzo" hidden></canvas>
+
+        </section>
+
+
+        <!-- SELECCION DE IMAGEN -->
+
+        <section class="inspection-card">
+
+            <div class="card-heading">
+                <div class="card-icon">🖼️</div>
+                <div>
+                    <h2>Imagen para inspección</h2>
+                    <p>Seleccione una fotografía almacenada en su dispositivo</p>
+                </div>
+            </div>
+
+            <div class="upload-area">
+
+                <div class="upload-symbol">⇧</div>
+
+                <h3>Seleccionar fotografía</h3>
+
+                <p>Formatos admitidos: JPG, JPEG, PNG y BMP</p>
+
+                <input type="file"
+                       name="imagen"
+                       id="imagen"
+                       accept=".jpg,.jpeg,.png,.bmp"
+                       required>
+
+            </div>
+
+            <div class="preview-section" id="contenedorVista">
+
+                <h3>Vista previa de la preforma</h3>
+
+                <div class="preview-frame">
+                    <img id="vistaPrevia"
+                         alt="Fotografía de la preforma PET">
+                </div>
+
+                <p class="image-name" id="nombreImagen"></p>
+
+            </div>
+
+        </section>
+
+
+        <!-- INFORMACION -->
+
+        <div class="info-note">
+            <span>ⓘ</span>
+            <div>
+                <strong>Información del proceso</strong><br>
+                La imagen será almacenada y registrada para su
+                posterior análisis de calidad. La clasificación
+                automática dependerá de la integración del modelo
+                de inteligencia artificial.
+            </div>
+        </div>
+
+
+        <button type="submit"
+                class="submit-button"
+                id="btnEnviar">
+            REGISTRAR IMAGEN PARA INSPECCIÓN
+        </button>
+
+    </form>
+
+
+    <a href="{{ url_for('dashboard') }}" class="back-link">
+        ← Volver al panel principal
+    </a>
+
+</div>
+
+
+<script>
+    let flujoCamara = null;
+    let urlPrevia = null;
+
+    const video = document.getElementById("camara");
+    const entrada = document.getElementById("imagen");
+    const vista = document.getElementById("vistaPrevia");
+    const contenedorVista = document.getElementById("contenedorVista");
+    const estado = document.getElementById("estadoCamara");
+
+    const btnActivar = document.getElementById("btnActivar");
+    const btnCapturar = document.getElementById("btnCapturar");
+    const btnDetener = document.getElementById("btnDetener");
+    const btnEnviar = document.getElementById("btnEnviar");
+
+    const formulario = document.getElementById("formularioInspeccion");
+
+
+    function actualizarVista(archivo) {
+
+        if (urlPrevia) {
+            URL.revokeObjectURL(urlPrevia);
+        }
+
+        urlPrevia = URL.createObjectURL(archivo);
+
+        vista.src = urlPrevia;
+
+        contenedorVista.style.display = "block";
+
+        document.getElementById("nombreImagen").textContent =
+            "Archivo: " + archivo.name;
+    }
+
+
+    async function iniciarCamara() {
+
+        try {
+
+            if (!navigator.mediaDevices ||
+                !navigator.mediaDevices.getUserMedia) {
+                throw new Error("CAMARA_NO_DISPONIBLE");
+            }
+
+            flujoCamara = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: { ideal: "environment" },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                },
+                audio: false
+            });
+
+            video.srcObject = flujoCamara;
+            video.hidden = false;
+
+            document.getElementById("mensajeCamara").hidden = true;
+
+            btnActivar.disabled = true;
+            btnCapturar.disabled = false;
+            btnDetener.disabled = false;
+
+            estado.textContent = "Cámara activada correctamente.";
+
+        } catch (error) {
+
+            console.error(error);
+
+            estado.textContent =
+                "No se pudo acceder a la cámara. Compruebe los permisos del navegador.";
+        }
+    }
+
+
+    function capturarImagen() {
+
+        if (!flujoCamara || video.readyState < 2) {
+            estado.textContent = "Primero debe activar la cámara.";
+            return;
+        }
+
+        const canvas = document.getElementById("lienzo");
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const contexto = canvas.getContext("2d");
+
+        contexto.drawImage(
+            video,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        canvas.toBlob(function(blob) {
+
+            if (!blob) {
+                estado.textContent = "No se pudo capturar la fotografía.";
+                return;
+            }
+
+            const archivo = new File(
+                [blob],
+                "captura_preforma.jpg",
+                { type: "image/jpeg" }
+            );
+
+            const transferencia = new DataTransfer();
+
+            transferencia.items.add(archivo);
+
+            entrada.files = transferencia.files;
+
+            actualizarVista(archivo);
+
+            estado.textContent =
+                "Fotografía capturada correctamente. Lista para registrar.";
+
+        }, "image/jpeg", 0.95);
+    }
+
+
+    function detenerCamara() {
+
+        if (flujoCamara) {
+
+            flujoCamara.getTracks().forEach(function(pista) {
+                pista.stop();
+            });
+
+            flujoCamara = null;
+        }
+
+        video.srcObject = null;
+        video.hidden = true;
+
+        document.getElementById("mensajeCamara").hidden = false;
+
+        btnActivar.disabled = false;
+        btnCapturar.disabled = true;
+        btnDetener.disabled = true;
+
+        estado.textContent = "Cámara detenida.";
+    }
+
+
+    entrada.addEventListener("change", function() {
+
+        if (!entrada.files.length) {
+            return;
+        }
+
+        const archivo = entrada.files[0];
+
+        const extensiones = ["jpg", "jpeg", "png", "bmp"];
+        const extension = archivo.name.split(".").pop().toLowerCase();
+
+        if (!extensiones.includes(extension)) {
+
+            entrada.value = "";
+
+            estado.textContent = "Formato de imagen no permitido.";
+
+            return;
+        }
+
+        actualizarVista(archivo);
+
+        estado.textContent = "Imagen seleccionada correctamente.";
+    });
+
+
+    btnActivar.addEventListener("click", iniciarCamara);
+    btnCapturar.addEventListener("click", capturarImagen);
+    btnDetener.addEventListener("click", detenerCamara);
+
+
+    formulario.addEventListener("submit", function(event) {
+
+        if (!entrada.files || entrada.files.length === 0) {
+
+            event.preventDefault();
+
+            estado.textContent =
+                "Debe capturar o seleccionar una fotografía.";
+
+            return;
+        }
+
+        btnEnviar.disabled = true;
+        btnEnviar.textContent = "REGISTRANDO IMAGEN...";
+    });
+
+
+    window.addEventListener("beforeunload", function() {
+
+        if (flujoCamara) {
+            flujoCamara.getTracks().forEach(function(pista) {
+                pista.stop();
+            });
+        }
+
+        if (urlPrevia) {
+            URL.revokeObjectURL(urlPrevia);
+        }
+    });
+
+</script>
+
+{% endblock %}

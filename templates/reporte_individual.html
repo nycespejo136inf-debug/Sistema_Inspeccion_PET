@@ -1,0 +1,117 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="usuarios-panel">
+
+    <div class="reporte-acciones">
+        <a href="{{ url_for('reportes') }}" class="btn-volver">
+            ← Volver a reportes
+        </a>
+
+        <a href="{{ url_for('descargar_reporte_individual', id=datos.registro.id) }}"
+           class="btn-descargar-pdf">
+            ↓ Descargar PDF
+        </a>
+    </div>
+
+    <div class="hoja-reporte">
+
+        <div class="hoja-encabezado">
+            <h2>EMPACAR S.A.</h2>
+            <p>Sistema Inteligente de Control de Calidad PET</p>
+            <h3>REPORTE INDIVIDUAL DE INSPECCIÓN</h3>
+        </div>
+
+        <div class="hoja-seccion">
+            <h3>1. Información de la inspección</h3>
+
+            <table class="tabla-datos-reporte">
+                <tr>
+                    <th>Código de inspección</th>
+                    <td>#{{ datos.registro.id }}</td>
+                </tr>
+
+                <tr>
+                    <th>Usuario responsable</th>
+                    <td>{{ datos.registro.usuario }}</td>
+                </tr>
+
+                <tr>
+                    <th>Fecha y hora</th>
+                    <td>{{ datos.registro.fecha }}</td>
+                </tr>
+
+                <tr>
+                    <th>Resultado registrado</th>
+                    <td>{{ datos.registro.resultado }}</td>
+                </tr>
+
+                <tr>
+                    <th>Densidad de bordes</th>
+                    <td>
+                        {% if datos.densidad is not none %}
+                            {{ datos.densidad }} %
+                        {% else %}
+                            No disponible
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Imagen inspeccionada</th>
+                    <td>{{ datos.registro.imagen }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="hoja-seccion">
+            <h3>2. Evidencia fotográfica</h3>
+
+            <div class="evidencias-reporte">
+
+                {% if datos.imagen_original_url %}
+
+                <div class="evidencia-item">
+                    <h4>Imagen original</h4>
+                    <img src="{{ datos.imagen_original_url }}"
+                         alt="Imagen original de la preforma">
+                </div>
+
+                {% endif %}
+
+                {% if datos.imagen_procesada_url %}
+
+                <div class="evidencia-item">
+                    <h4>Imagen procesada</h4>
+                    <img src="{{ datos.imagen_procesada_url }}"
+                         alt="Imagen procesada de la inspección">
+                </div>
+
+                {% endif %}
+
+                {% if not datos.imagen_original_url %}
+                    <p>No se encontró el archivo de imagen original.</p>
+                {% endif %}
+
+            </div>
+        </div>
+
+        <div class="hoja-observacion">
+            <strong>Observación:</strong>
+            El resultado mostrado corresponde al registro almacenado en el sistema.
+            La densidad de bordes es un indicador obtenido mediante procesamiento
+            de imágenes y no constituye por sí sola una confirmación definitiva
+            de una anomalía física.
+        </div>
+
+        <div class="hoja-pie">
+            Sistema Inteligente de Inspección de Preformas PET - EMPACAR S.A.
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

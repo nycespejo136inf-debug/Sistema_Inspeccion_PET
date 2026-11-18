@@ -1,0 +1,150 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="usuarios-panel">
+
+    <div class="usuarios-encabezado">
+        <div>
+            <span class="usuarios-etiqueta">SEGURIDAD DEL SISTEMA</span>
+            <h2>Reportes mensuales de accesos</h2>
+            <p>Consulte los ingresos de los usuarios por mes y año</p>
+        </div>
+
+        <div class="usuarios-icono">📊</div>
+    </div>
+
+    <div class="tabla-usuarios-card">
+
+        <div class="tabla-usuarios-encabezado">
+            <div>
+                <h3>Seleccionar periodo</h3>
+                <p>Elija el mes y año que desea consultar</p>
+            </div>
+        </div>
+
+        <form method="GET"
+              action="{{ url_for('reporte_accesos_mensual') }}"
+              class="formulario-usuario">
+
+            <label>Mes</label>
+
+            <select name="mes" required>
+                {% for numero in range(1, 13) %}
+                <option value="{{ numero }}"
+                    {% if mes == numero %}selected{% endif %}>
+                    {{ [
+                    'Enero', 'Febrero', 'Marzo', 'Abril',
+                    'Mayo', 'Junio', 'Julio', 'Agosto',
+                    'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+                    ][numero - 1] }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label>Año</label>
+
+            <input type="number"
+                   name="anio"
+                   value="{{ anio }}"
+                   min="2000"
+                   max="{{ anio + 1 }}"
+                   required>
+
+            <button type="submit" class="btn-reporte">
+                🔎 Consultar reporte
+            </button>
+
+        </form>
+
+    </div>
+
+    <div class="usuarios-resumen">
+        <div class="resumen-icono">📋</div>
+        <div>
+            <span>Ingresos registrados en {{ nombre_mes }} de {{ anio }}</span>
+            <strong>{{ registros|length }}</strong>
+        </div>
+    </div>
+
+    <div class="reporte-acciones">
+
+        <a href="{{ url_for('accesos') }}" class="btn-reporte">
+            ← Volver a accesos
+        </a>
+
+        <a href="{{ url_for(
+            'descargar_reporte_accesos_mensual',
+            mes=mes,
+            anio=anio
+        ) }}" class="btn-descargar-pdf">
+            📄 Descargar PDF
+        </a>
+
+    </div>
+
+    <div class="tabla-usuarios-card">
+
+        <div class="tabla-usuarios-encabezado">
+            <div>
+                <h3>Detalle de ingresos</h3>
+                <p>{{ nombre_mes }} de {{ anio }}</p>
+            </div>
+
+            <span class="etiqueta-historial">
+                ● Registro mensual
+            </span>
+        </div>
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-profesional">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Nombre completo</th>
+                        <th>Rol</th>
+                        <th>Fecha y hora</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for acceso in registros %}
+
+                    <tr>
+                        <td class="usuario-id">#{{ acceso.id }}</td>
+                        <td class="usuario-nombre">{{ acceso.usuario }}</td>
+                        <td>{{ acceso.nombre }}</td>
+                        <td>{{ acceso.rol }}</td>
+                        <td>{{ acceso.fecha }}</td>
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="5" class="tabla-vacia">
+                            <div class="historial-vacio">
+                                <span>📭</span>
+                                <strong>No existen ingresos registrados</strong>
+                                <p>No se encontraron accesos durante este periodo</p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

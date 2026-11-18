@@ -1,0 +1,108 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="usuarios-panel">
+
+    <div class="usuarios-encabezado">
+        <div>
+            <span class="usuarios-etiqueta">DOCUMENTACIÓN DEL SISTEMA</span>
+            <h2>Centro de reportes</h2>
+            <p>Consulte y genere documentos de las inspecciones PET</p>
+        </div>
+        <div class="usuarios-icono">📄</div>
+    </div>
+
+    <div class="reporte-tarjetas">
+
+        <div class="reporte-opcion">
+            <div class="reporte-opcion-icono">📋</div>
+            <h3>Reporte individual</h3>
+            <p>Visualice y descargue el documento PDF de una inspección específica.</p>
+            <span class="reporte-ayuda">Seleccione una inspección de la tabla</span>
+        </div>
+
+        <div class="reporte-opcion">
+            <div class="reporte-opcion-icono">📊</div>
+            <h3>Reporte general</h3>
+            <p>Consulte el resumen completo y el detalle de todas las inspecciones.</p>
+            <a href="{{ url_for('reporte_general') }}"
+               class="btn-reporte">
+                Ver reporte general
+            </a>
+        </div>
+
+    </div>
+
+    <div class="usuarios-resumen">
+        <div class="resumen-icono">📑</div>
+        <div>
+            <span>Total de inspecciones registradas</span>
+            <strong>{{ resumen.total }}</strong>
+        </div>
+    </div>
+
+    <div class="tabla-usuarios-card">
+
+        <div class="tabla-usuarios-encabezado">
+            <div>
+                <h3>Inspecciones disponibles</h3>
+                <p>Seleccione una inspección para visualizar su reporte</p>
+            </div>
+        </div>
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-profesional">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Imagen</th>
+                        <th>Resultado</th>
+                        <th>Fecha</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for registro in registros %}
+
+                    <tr>
+                        <td class="usuario-id">#{{ registro.id }}</td>
+                        <td class="usuario-nombre">{{ registro.usuario }}</td>
+                        <td>{{ registro.imagen }}</td>
+                        <td>{{ registro.resultado }}</td>
+                        <td>{{ registro.fecha }}</td>
+                        <td>
+                            <a class="btn-ver-reporte"
+                               href="{{ url_for('reporte_individual', id=registro.id) }}">
+                                Ver reporte
+                            </a>
+                        </td>
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="6" class="tabla-vacia">
+                            Todavía no existen inspecciones registradas
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

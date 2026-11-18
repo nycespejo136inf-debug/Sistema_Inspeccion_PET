@@ -1,0 +1,79 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="usuarios-panel">
+
+    <div class="usuarios-encabezado">
+        <div>
+            <span class="usuarios-etiqueta">ADMINISTRACIÓN DEL SISTEMA</span>
+            <h2>Gestión de usuarios</h2>
+            <p>Administre las cuentas y los roles de acceso al sistema</p>
+        </div>
+
+        <div class="usuarios-icono">👥</div>
+    </div>
+
+    <div class="usuarios-resumen">
+        <div class="resumen-icono">👤</div>
+        <div>
+            <span>Usuarios registrados</span>
+            <strong>{{ registros|length }}</strong>
+        </div>
+    </div>
+
+    <div class="tabla-usuarios-card">
+
+        <div class="tabla-usuarios-encabezado">
+            <div>
+                <h3>Listado de usuarios</h3>
+                <p>Información de las cuentas registradas</p>
+            </div>
+
+            <a href="{{ url_for('crear_usuario') }}" class="btn-nuevo-usuario">
+                + Crear nuevo usuario
+            </a>
+        </div>
+
+        <div class="tabla-contenedor">
+            <table class="tabla-profesional">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre completo</th>
+                        <th>Nombre de usuario</th>
+                        <th>Rol asignado</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for usuario in registros %}
+                    <tr>
+                        <td class="usuario-id">#{{ usuario.id }}</td>
+                        <td class="usuario-nombre">{{ usuario.nombre }}</td>
+                        <td>{{ usuario.usuario }}</td>
+                        <td>
+                            {% if usuario.rol == 'Administrador' %}
+                                <span class="rol-admin">Administrador</span>
+                            {% else %}
+                                <span class="rol-operador">Operador</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="tabla-vacia">
+                            No existen usuarios registrados
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

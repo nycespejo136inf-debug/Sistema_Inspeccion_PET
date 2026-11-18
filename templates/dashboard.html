@@ -1,0 +1,80 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="titulo-pagina">
+    <h1>Panel principal</h1>
+    <p>Bienvenido al sistema de control de calidad de EMPACAR S.A.</p>
+</div>
+
+<div class="tarjetas">
+
+    <div class="tarjeta">
+        <h3>Total de inspecciones</h3>
+        <strong>{{ total }}</strong>
+        <p>Imágenes registradas</p>
+    </div>
+
+    <div class="tarjeta">
+        <h3>Pendientes de análisis</h3>
+        <strong>{{ pendientes }}</strong>
+        <p>Esperando procesamiento</p>
+    </div>
+
+    <div class="tarjeta">
+        <h3>Tipo de producto</h3>
+        <strong>PET</strong>
+        <p>Preformas transparentes</p>
+    </div>
+
+</div>
+
+<div class="seccion">
+
+    <h2>Acciones del sistema</h2>
+
+    <div class="acciones">
+
+        <a href="{{ url_for('inspeccion') }}" class="boton">
+            Nueva inspección
+        </a>
+
+        <a href="{{ url_for('historial') }}" class="boton secundario">
+            Consultar historial
+        </a>
+
+    </div>
+
+</div>
+
+<div class="seccion">
+
+    <h2>Últimas inspecciones</h2>
+
+    <table>
+        <tr>
+            <th>Código</th>
+            <th>Usuario</th>
+            <th>Resultado</th>
+            <th>Fecha</th>
+        </tr>
+
+        {% for registro in historial %}
+        <tr>
+            <td>{{ registro.id }}</td>
+            <td>{{ registro.usuario }}</td>
+            <td>{{ registro.resultado }}</td>
+            <td>{{ registro.fecha }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="4">Todavía no existen inspecciones</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+</div>
+
+{% endblock %}

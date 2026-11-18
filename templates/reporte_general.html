@@ -1,0 +1,107 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="usuarios-panel">
+
+    <div class="reporte-acciones">
+        <a href="{{ url_for('reportes') }}" class="btn-volver">
+            ← Volver a reportes
+        </a>
+
+        <a href="{{ url_for('descargar_reporte_general') }}"
+           class="btn-descargar-pdf">
+            ↓ Descargar PDF general
+        </a>
+    </div>
+
+    <div class="hoja-reporte">
+
+        <div class="hoja-encabezado">
+            <h2>EMPACAR S.A.</h2>
+            <p>Sistema Inteligente de Control de Calidad PET</p>
+            <h3>REPORTE GENERAL DE INSPECCIONES</h3>
+        </div>
+
+        <div class="hoja-seccion">
+            <h3>1. Resumen general</h3>
+
+            <div class="resumen-reporte-general">
+
+                <div>
+                    <span>Total de inspecciones</span>
+                    <strong>{{ resumen.total }}</strong>
+                </div>
+
+                <div>
+                    <span>Conformes</span>
+                    <strong>{{ resumen.conformes }}</strong>
+                </div>
+
+                <div>
+                    <span>Con anomalía</span>
+                    <strong>{{ resumen.anomalias }}</strong>
+                </div>
+
+                <div>
+                    <span>Pendientes</span>
+                    <strong>{{ resumen.pendientes }}</strong>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="hoja-seccion">
+            <h3>2. Detalle de inspecciones</h3>
+
+            <div class="tabla-contenedor">
+                <table class="tabla-profesional">
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Imagen</th>
+                            <th>Resultado</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for registro in registros %}
+
+                        <tr>
+                            <td>#{{ registro.id }}</td>
+                            <td>{{ registro.usuario }}</td>
+                            <td>{{ registro.imagen }}</td>
+                            <td>{{ registro.resultado }}</td>
+                            <td>{{ registro.fecha }}</td>
+                        </tr>
+
+                        {% else %}
+
+                        <tr>
+                            <td colspan="5" class="tabla-vacia">
+                                No existen inspecciones registradas
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+        <div class="hoja-pie">
+            Sistema Inteligente de Inspección de Preformas PET - EMPACAR S.A.
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,189 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sistema Inteligente PET - EMPACAR S.A.</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='estilos.css') }}">
+</head>
+
+<body>
+
+    {% if session.get('usuario') %}
+
+    <!-- ENCABEZADO PRINCIPAL -->
+    <header class="encabezado">
+
+        <div>
+            <h2>EMPACAR S.A.</h2>
+            <p>Sistema Inteligente de Control de Calidad PET</p>
+        </div>
+
+        <div class="usuario">
+            {{ session.get('nombre') }}
+            <span>{{ session.get('rol') }}</span>
+        </div>
+
+    </header>
+
+    <!-- MENÚ DE NAVEGACIÓN RESPONSIVE -->
+    <nav class="menu">
+
+        <button type="button"
+                class="menu-toggle"
+                onclick="alternarMenu()"
+                aria-label="Abrir menú"
+                aria-expanded="false"
+                id="botonMenu">
+            ☰
+            <span>Menú</span>
+        </button>
+
+        <div class="menu-opciones" id="menuOpciones">
+
+            <a href="{{ url_for('dashboard') }}">
+                Inicio
+            </a>
+
+            <a href="{{ url_for('inspeccion') }}">
+                Inspección
+            </a>
+
+            <a href="{{ url_for('historial') }}">
+                Historial
+            </a>
+            <a href="{{ url_for('reportes') }}">
+    Reportes
+</a>
+
+            <a href="{{ url_for('cambiar_password') }}">
+                Cambiar contraseña
+            </a>
+
+            {% if session.get('rol') == 'Administrador' %}
+
+                <a href="{{ url_for('usuarios') }}">
+                    Usuarios
+                </a>
+
+                <a href="{{ url_for('accesos') }}">
+                    Accesos
+                </a>
+
+            {% endif %}
+
+            <a href="#" onclick="mostrarConfirmacion(); return false;">
+                Cerrar sesión
+            </a>
+
+        </div>
+
+    </nav>
+
+    {% endif %}
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="contenido">
+
+        {% with mensajes = get_flashed_messages() %}
+
+            {% if mensajes %}
+
+                {% for mensaje in mensajes %}
+
+                    <div class="mensaje">
+                        {{ mensaje }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
+
+        {% block contenido %}{% endblock %}
+
+    </main>
+
+    <!-- PIE DE PÁGINA -->
+    <footer>
+        Sistema de Inspección de Preformas PET - EMPACAR S.A.
+    </footer>
+
+    <!-- VENTANA PERSONALIZADA DE CIERRE DE SESIÓN -->
+    <div id="modalCerrarSesion" class="modal-sesion">
+
+        <div class="modal-sesion-contenido">
+
+            <div class="icono-sesion">🔒</div>
+
+            <h2>¿Cerrar sesión?</h2>
+
+            <p>
+                ¿Estás seguro de que deseas salir del sistema?
+            </p>
+
+            <div class="botones-sesion">
+
+                <button type="button"
+                        onclick="cancelarCerrarSesion()"
+                        class="btn-cancelar">
+                    Cancelar
+                </button>
+
+                <a href="{{ url_for('logout') }}"
+                   class="btn-confirmar">
+                    Sí, cerrar sesión
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FUNCIONES JAVASCRIPT -->
+    <script>
+
+        // ABRIR Y CERRAR EL MENÚ RESPONSIVE
+        function alternarMenu() {
+
+            const opciones = document.getElementById("menuOpciones");
+            const boton = document.getElementById("botonMenu");
+
+            opciones.classList.toggle("menu-abierto");
+
+            const abierto = opciones.classList.contains("menu-abierto");
+
+            boton.setAttribute("aria-expanded", abierto);
+
+            boton.innerHTML = abierto
+                ? "✕ Cerrar menú"
+                : "☰ Menú";
+        }
+
+
+        // MOSTRAR CONFIRMACIÓN DE CIERRE DE SESIÓN
+        function mostrarConfirmacion() {
+
+            document.getElementById("modalCerrarSesion").style.display = "flex";
+
+        }
+
+
+        // CANCELAR CIERRE DE SESIÓN
+        function cancelarCerrarSesion() {
+
+            document.getElementById("modalCerrarSesion").style.display = "none";
+
+        }
+
+    </script>
+
+</body>
+</html>

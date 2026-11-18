@@ -1,0 +1,85 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="usuarios-panel">
+
+    <div class="usuarios-encabezado">
+        <div>
+            <span class="usuarios-etiqueta">SEGURIDAD DEL SISTEMA</span>
+            <h2>Historial de accesos</h2>
+            <p>Consulte los registros de inicio de sesión de los usuarios</p>
+        </div>
+
+        <div class="usuarios-icono">🔐</div>
+    <a href="{{ url_for('reporte_accesos_mensual') }}"
+   class="btn-reporte">
+    📊 Reportes mensuales
+</a>
+    </div>
+
+    <div class="usuarios-resumen">
+        <div class="resumen-icono">📋</div>
+        <div>
+            <span>Total de accesos registrados</span>
+            <strong>{{ registros|length }}</strong>
+        </div>
+    </div>
+
+    <div class="tabla-usuarios-card">
+
+        <div class="tabla-usuarios-encabezado">
+            <div>
+                <h3>Registro de actividad</h3>
+                <p>Detalle de los inicios de sesión realizados</p>
+            </div>
+
+            <span class="etiqueta-historial">● Registro de accesos</span>
+        </div>
+
+        <div class="tabla-contenedor">
+            <table class="tabla-profesional">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Fecha y hora de acceso</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for acceso in registros %}
+                    <tr>
+                        <td class="usuario-id">#{{ acceso.id }}</td>
+                        <td class="usuario-nombre">
+                            {{ acceso.usuario }}
+                        </td>
+                        <td>{{ acceso.fecha }}</td>
+                        <td>
+                            <span class="acceso-exitoso">
+                                Acceso registrado
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="tabla-vacia">
+                            <div class="historial-vacio">
+                                <span>📭</span>
+                                <strong>No hay accesos registrados</strong>
+                                <p>Los inicios de sesión aparecerán aquí</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

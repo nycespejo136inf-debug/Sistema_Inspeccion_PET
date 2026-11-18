@@ -1,0 +1,53 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="titulo-pagina">
+    <h1>Historial de inspecciones</h1>
+    <p>Registro de imágenes y resultados del sistema</p>
+</div>
+
+<div class="seccion">
+
+    <table>
+
+        <tr>
+            <th>Código</th>
+            <th>Imagen</th>
+            <th>Usuario</th>
+            <th>Resultado</th>
+            <th>Fecha</th>
+        </tr>
+
+        {% for registro in registros %}
+
+        <tr>
+            <td>{{ registro.id }}</td>
+
+            <td>
+                <img
+                    src="{{ url_for('static', filename='imagenes/' + registro.imagen) }}"
+                    class="imagen-historial"
+                    alt="Preforma PET"
+                >
+            </td>
+
+            <td>{{ registro.usuario }}</td>
+            <td>{{ registro.resultado }}</td>
+            <td>{{ registro.fecha }}</td>
+        </tr>
+
+        {% else %}
+
+        <tr>
+            <td colspan="5">No existen inspecciones registradas</td>
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</div>
+
+{% endblock %}

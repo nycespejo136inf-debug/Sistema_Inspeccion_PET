@@ -1,0 +1,73 @@
+
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="usuarios-panel">
+
+    <div class="usuarios-encabezado">
+        <div>
+            <span class="usuarios-etiqueta">ADMINISTRACIÓN DEL SISTEMA</span>
+            <h2>Registrar nuevo usuario</h2>
+            <p>Complete los datos para habilitar el acceso al sistema de inspección</p>
+        </div>
+        <div class="usuarios-icono">👤</div>
+    </div>
+
+    <div class="formulario-usuario-card">
+
+        <div class="formulario-titulo">
+            <h3>Información del usuario</h3>
+            <p>Los campos marcados son obligatorios</p>
+        </div>
+
+        <form method="POST" class="formulario-usuario">
+
+            <div class="campo-usuario">
+                <label>Nombre completo</label>
+                <input type="text" name="nombre"
+                       placeholder="Ingrese el nombre completo"
+                       required>
+            </div>
+
+            <div class="campo-usuario">
+                <label>Nombre de usuario</label>
+                <input type="text" name="usuario"
+                       placeholder="Ej. operador01"
+                       required>
+            </div>
+
+            <div class="campo-usuario">
+                <label>Contraseña</label>
+                <input type="password" name="password"
+                       placeholder="Mínimo 8 caracteres"
+                       minlength="8" required>
+                <small>La contraseña debe contener al menos 8 caracteres</small>
+            </div>
+
+            <div class="campo-usuario">
+                <label>Rol del usuario</label>
+                <select name="rol" required>
+                    <option value="Operador">Operador</option>
+                    <option value="Administrador">Administrador</option>
+                </select>
+                <small>Seleccione los permisos que tendrá el usuario</small>
+            </div>
+
+            <div class="acciones-usuario">
+                <a href="{{ url_for('usuarios') }}" class="btn-volver">
+                    Cancelar
+                </a>
+
+                <button type="submit" class="btn-registrar">
+                    + Registrar usuario
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
