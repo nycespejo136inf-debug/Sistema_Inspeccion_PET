@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from flask import send_file
 from io import BytesIO
@@ -67,7 +68,23 @@ os.makedirs("reportes", exist_ok=True)
 EXTENSIONES = {"jpg", "jpeg", "png", "bmp"}
 
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
+# ==========================================
+# CONTROL DE ARCHIVOS MAYORES A 10 MB
+# ==========================================
 
+@app.errorhandler(413)
+def archivo_demasiado_grande(error):
+
+    flash(
+        "La imagen supera el límite permitido de 10 MB. "
+        "Seleccione otra fotografía.",
+        "error"
+    )
+
+    if usuario_requerido():
+        return redirect(url_for("inspeccion"))
+
+    return redirect(url_for("login"))
 
 # ==========================================
 # FUNCIONES GENERALES
@@ -111,6 +128,8 @@ def inicio():
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
+    inicio_perf001 = time.perf_counter() if request.method == "POST" else None
+
     if request.method == "POST":
 
         usuario = request.form["usuario"].strip()
@@ -119,14 +138,12 @@ def login():
         conexion = conectar()
 
         try:
-
             resultado = conexion.execute("""
                 SELECT * FROM usuarios
                 WHERE usuario = ?
             """, (usuario,)).fetchone()
 
         finally:
-
             conexion.close()
 
         if resultado and check_password_hash(
@@ -137,16 +154,16 @@ def login():
             session["nombre"] = resultado["nombre"]
             session["rol"] = resultado["rol"]
 
-            # Registrar inicio de sesión exitoso
             registrar_acceso(resultado["usuario"])
+
+            # Guardar el inicio para medir hasta la carga del panel
+            session["_perf001_inicio"] = inicio_perf001
 
             return redirect(url_for("dashboard"))
 
         flash("Usuario o contraseña incorrectos")
 
     return render_template("login.html")
-
-
 # ==========================================
 # PANEL PRINCIPAL
 # ==========================================
@@ -161,13 +178,11 @@ def dashboard():
 
     try:
 
-        # Total de inspecciones
         total = conexion.execute("""
             SELECT COUNT(*) AS cantidad
             FROM inspecciones
         """).fetchone()["cantidad"]
 
-        # Inspecciones pendientes
         pendientes = conexion.execute("""
             SELECT COUNT(*) AS cantidad
             FROM inspecciones
@@ -177,7 +192,6 @@ def dashboard():
             )
         """).fetchone()["cantidad"]
 
-        # Últimas cinco inspecciones
         historial = conexion.execute("""
             SELECT *
             FROM inspecciones
@@ -186,20 +200,34 @@ def dashboard():
         """).fetchall()
 
     finally:
-
         conexion.close()
 
-    return render_template(
+    respuesta = render_template(
         "dashboard.html",
         total=total,
         pendientes=pendientes,
         historial=historial
     )
 
+    inicio = session.pop("_perf001_inicio", None)
+
+    if inicio is not None:
+
+        tiempo_ms = (time.perf_counter() - inicio) * 1000
+
+        print("--------------------------------")
+        print("PRUEBA PERF001")
+        print("Inicio de sesión y carga del panel")
+        print("Tiempo de respuesta:", round(tiempo_ms, 2), "ms")
+        print("--------------------------------")
+
+    return respuesta
+
 
 # ==========================================
 # MÓDULO DE INSPECCIÓN
 # ==========================================
+
 
 @app.route("/inspeccion", methods=["GET", "POST"])
 def inspeccion():
@@ -208,28 +236,34 @@ def inspeccion():
         return redirect(url_for("login"))
 
     if request.method == "POST":
-
-        # Comprobar que se haya enviado una imagen
+        inicio_perf002 = time.perf_counter()
+        # 1. Comprobar que se haya enviado una imagen
         if "imagen" not in request.files:
-
-            flash("Debes seleccionar una imagen")
+            flash(
+                "No se recibió ninguna imagen. Seleccione una fotografía.",
+                "error"
+            )
             return redirect(url_for("inspeccion"))
 
         archivo = request.files["imagen"]
 
-        # Comprobar que el archivo no esté vacío
-        if archivo.filename == "":
-
-            flash("No seleccionaste ninguna imagen")
+        # 2. Comprobar que se haya seleccionado un archivo
+        if not archivo.filename or not archivo.filename.strip():
+            flash(
+                "No seleccionó ninguna imagen. Intente nuevamente.",
+                "error"
+            )
             return redirect(url_for("inspeccion"))
 
-        # Comprobar formato permitido
+        # 3. Validar formato
         if not archivo_permitido(archivo.filename):
-
-            flash("Formato no permitido. Usa JPG, PNG o BMP")
+            flash(
+                "Formato no permitido. Utilice JPG, JPEG, PNG o BMP.",
+                "error"
+            )
             return redirect(url_for("inspeccion"))
 
-        # Generar nombre único
+        # 4. Generar nombre único
         extension = archivo.filename.rsplit(".", 1)[1].lower()
 
         nombre_archivo = secure_filename(
@@ -241,31 +275,62 @@ def inspeccion():
             nombre_archivo
         )
 
-        # Guardar imagen original
+        # 5. Guardar imagen temporalmente
         archivo.save(ruta)
+        tiempo_guardado = (
+            time.perf_counter() - inicio_perf002
+        ) * 1000
 
-        # Verificar que la imagen sea válida
+        inicio_perf003 = time.perf_counter()
+        # 6. Comprobar que el archivo no esté vacío
+        if not os.path.isfile(ruta) or os.path.getsize(ruta) == 0:
+
+            if os.path.exists(ruta):
+                os.remove(ruta)
+
+            flash(
+                "El archivo está vacío. Seleccione otra imagen.",
+                "error"
+            )
+            return redirect(url_for("inspeccion"))
+
+        # 7. Verificar que OpenCV pueda leer la imagen
         imagen = cv2.imread(ruta)
 
         if imagen is None:
 
             os.remove(ruta)
 
-            flash("El archivo seleccionado no es una imagen válida")
+            flash(
+                "La imagen está dañada o no se puede leer. "
+                "Seleccione otra fotografía.",
+                "error"
+            )
             return redirect(url_for("inspeccion"))
 
-        # ----------------------------------
-        # PROCESAMIENTO CON OPENCV
-        # ----------------------------------
-
+        # 8. Procesamiento con OpenCV
         try:
 
             datos_analisis = analizar_imagen(ruta)
-            # Obtener resultado de la clasificación
-            resultado = datos_analisis["estado"]
-            # Obtener información del procesamiento
-            densidad = datos_analisis["densidad_bordes"]
 
+            resultado = datos_analisis["estado"]
+            densidad = datos_analisis["densidad_bordes"]
+            tiempo_validacion = (
+                time.perf_counter() - inicio_perf003
+            ) * 1000
+
+            print("--------------------------------")
+            print("PRUEBA PERF002")
+            print("Guardado de imagen:", round(tiempo_guardado, 2), "ms")
+            print("--------------------------------")
+
+            print("PRUEBA PERF003")
+            print(
+                "Validación y procesamiento:",
+                round(tiempo_validacion, 2),
+                "ms"
+            )
+            print("--------------------------------")
             print("--------------------------------")
             print("INSPECCIÓN PROCESADA")
             print("Usuario:", session["usuario"])
@@ -273,12 +338,9 @@ def inspeccion():
             print("Ancho:", datos_analisis["ancho"])
             print("Alto:", datos_analisis["alto"])
             print("Densidad de bordes:", densidad, "%")
-            print(
-                "Imagen procesada:",
-                datos_analisis["imagen_procesada"]
-            )
             print("Resultado:", resultado)
             print("--------------------------------")
+
         except Exception as error:
 
             print("Error durante el análisis:", error)
@@ -290,16 +352,20 @@ def inspeccion():
 
             if "Imagen borrosa" in mensaje:
                 flash(
-                    mensaje, "error"
+                    "IMAGEN NO VÁLIDA: La fotografía está borrosa. "
+                    "Capture o seleccione otra imagen.",
+                    "error"
                 )
             else:
-                flash("Ocurrió un error al procesar la imagen")
+                flash(
+                    "No fue posible procesar la imagen. "
+                    "Seleccione otra fotografía.",
+                    "error"
+                )
 
             return redirect(url_for("inspeccion"))
-        # ----------------------------------
-        # GUARDAR RESULTADO EN MYSQL
-        # ----------------------------------
 
+        # 9. Guardar resultado en MySQL
         conexion = conectar()
 
         try:
@@ -322,18 +388,25 @@ def inspeccion():
 
             print("Error al guardar inspección:", error)
 
-            flash("No se pudo guardar la inspección")
+            if os.path.exists(ruta):
+                os.remove(ruta)
+
+            flash(
+                "No se pudo guardar la inspección en la base de datos.",
+                "error"
+            )
+
             return redirect(url_for("inspeccion"))
 
         finally:
 
             conexion.close()
 
+        # 10. Confirmación
         flash(
             "Imagen procesada correctamente. "
-            "Densidad de bordes: "
-            + str(densidad)
-            + "%"
+            "Densidad de bordes: " + str(densidad) + "%",
+            "success"
         )
 
         return redirect(url_for("historial"))

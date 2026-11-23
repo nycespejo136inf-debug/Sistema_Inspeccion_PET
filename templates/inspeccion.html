@@ -676,23 +676,48 @@
     }
 
 
+    
+    // VALIDACIÓN DE LA IMAGEN SELECCIONADA
+
     entrada.addEventListener("change", function() {
 
-        if (!entrada.files.length) {
+        if (!entrada.files || entrada.files.length === 0) {
             return;
         }
 
         const archivo = entrada.files[0];
-
         const extensiones = ["jpg", "jpeg", "png", "bmp"];
         const extension = archivo.name.split(".").pop().toLowerCase();
+        const MAXIMO = 10 * 1024 * 1024;
 
-        if (!extensiones.includes(extension)) {
-
+        function rechazarImagen(mensaje) {
             entrada.value = "";
+            contenedorVista.style.display = "none";
+            vista.removeAttribute("src");
+            estado.textContent = mensaje;
+        }
 
-            estado.textContent = "Formato de imagen no permitido.";
+        // Validar archivo vacío
+        if (archivo.size === 0) {
+            rechazarImagen(
+                "El archivo está vacío. Seleccione otra fotografía."
+            );
+            return;
+        }
 
+        // Validar formato
+        if (!extensiones.includes(extension)) {
+            rechazarImagen(
+                "Formato no permitido. Utilice JPG, JPEG, PNG o BMP."
+            );
+            return;
+        }
+
+        // Validar tamaño
+        if (archivo.size > MAXIMO) {
+            rechazarImagen(
+                "La imagen supera los 10 MB permitidos. Seleccione otra."
+            );
             return;
         }
 
@@ -702,15 +727,11 @@
     });
 
 
-    btnActivar.addEventListener("click", iniciarCamara);
-    btnCapturar.addEventListener("click", capturarImagen);
-    btnDetener.addEventListener("click", detenerCamara);
-
+    // VALIDACIÓN ANTES DE REGISTRAR LA INSPECCIÓN
 
     formulario.addEventListener("submit", function(event) {
 
         if (!entrada.files || entrada.files.length === 0) {
-
             event.preventDefault();
 
             estado.textContent =
@@ -719,10 +740,40 @@
             return;
         }
 
+        const archivo = entrada.files[0];
+        const extensiones = ["jpg", "jpeg", "png", "bmp"];
+        const extension = archivo.name.split(".").pop().toLowerCase();
+        const MAXIMO = 10 * 1024 * 1024;
+
+        if (archivo.size === 0) {
+            event.preventDefault();
+            estado.textContent = "El archivo está vacío. Seleccione otra imagen.";
+            return;
+        }
+
+        if (!extensiones.includes(extension)) {
+            event.preventDefault();
+            estado.textContent = "Formato no permitido. Utilice JPG, JPEG, PNG o BMP.";
+            return;
+        }
+
+        if (archivo.size > MAXIMO) {
+            event.preventDefault();
+            estado.textContent = "La imagen supera el límite de 10 MB.";
+            return;
+        }
+
         btnEnviar.disabled = true;
         btnEnviar.textContent = "REGISTRANDO IMAGEN...";
     });
 
+// CONECTAR LOS BOTONES DE LA CÁMARA
+
+btnActivar.addEventListener("click", iniciarCamara);
+
+btnCapturar.addEventListener("click", capturarImagen);
+
+btnDetener.addEventListener("click", detenerCamara);
 
     window.addEventListener("beforeunload", function() {
 
