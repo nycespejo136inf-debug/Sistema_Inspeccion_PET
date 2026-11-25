@@ -89,7 +89,7 @@ def archivo_demasiado_grande(error):
 # ==========================================
 # FUNCIONES GENERALES
 # ==========================================
-
+# FC-001: Código de validación de imágenes para revisión del equipo.
 def archivo_permitido(nombre):
 
     return (
