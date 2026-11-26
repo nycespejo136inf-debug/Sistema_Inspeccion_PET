@@ -296,14 +296,13 @@ def inspeccion():
 
         # 7. Verificar que OpenCV pueda leer la imagen
         imagen = cv2.imread(ruta)
-
         if imagen is None:
-
-            os.remove(ruta)
+            if os.path.exists(ruta):
+                os.remove(ruta)
 
             flash(
                 "La imagen está dañada o no se puede leer. "
-                "Seleccione otra fotografía.",
+                "Seleccione otra fotografía o capture una nueva.",
                 "error"
             )
             return redirect(url_for("inspeccion"))
